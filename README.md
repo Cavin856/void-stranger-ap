@@ -32,11 +32,6 @@ Delete to clear the current field, and Enter to connect to AP. Your most recent 
 dialogue sounds. I fixed all the ones needed to complete a run, but I'm sure there are other instances of this across 
 the game. If you run into this please provide the crash message so I can fix it.
 
-2. During the final RPG battle, the command menu text is squished together. This is purely visual thankfully. 
-
-3. If you try to input a brand you have not received, you will go to the next Brane instead, and the Brane value will 
-be 'B???'. This doesn't affect much but atoning fixes it.
-
 ## General options/game info
 Game Spoilers ahead, read at your own risk
 
@@ -48,7 +43,9 @@ An error message will display: "Waiting for VR Connection" until it is picked up
 the AP server and all items are received. 
 
 The Pause menu contains 2 new options replacing the close game option: Atone and End Run. The first acts as a portable 
-atoner, letting you go back to B001 at any time. The second is used to go back to brand entry, but is unimplemented.
+atoner, letting you go back to B001 at any time. The second is used to go back to brand entry.
+
+Pressing F11 will bring up a tracker showing all items received from AP.
 
 By default, the following are randomized: 
 
@@ -80,6 +77,8 @@ in the final area
 
 For now, the only goal is the DIS ending, goal is sent after completing the final gameplay section before the ending 
 sequence.
+
+The current working version is V0.8.0
 
 ## Future Plans
 
