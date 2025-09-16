@@ -1,3 +1,5 @@
+import importlib
+import os
 from typing import Dict, List
 from BaseClasses import Region, Item, CollectionState, ItemClassification
 from worlds.AutoWorld import WebWorld, World
@@ -33,12 +35,217 @@ class VoidStrangerWorld(World):
     goal_logic_mapping: Dict[str, List[List[str]]]
     greed_coin_count: int
 
+    brane_order = []            # ordered list of all 255 main branes in the seed
+    brane_list = {}             # dict of all branes in the seed, in the form {brane_id: {brane_data}}
+    dungeon_list = []           # list of dungeons in the seed, in format (dungeon_name, accessible?)
+    
+    blocked_connections = []    # list of blocked connection tuples to begin checking with in subsequent iterations of accessibility checks
+    incomplete_smilers = []     # list of incomplete smilers; incomplete because more locusts would allow further travel
+    incomplete_interfaces = []  # list of incomplete interface warps; incomplete because more locusts would allow further travel
+    
+    
+    
+    # for shuffle floors, we make a list with all main floors allowed by settings (generate keys method or w/e)
+    #   then pick a random subset of them to reach 256 floors after first including the required floors.
+    # for every floor with a shortcut, we pick a side brane and update the shortcut destination to that new side brane, and add the side brane to a list.
+    # then at the end, every side brane in that list gets assigned a possibly random exit floor, somewhere on the main brane_order.
+    # lastly, brand floors get their table updated too, and are handled similarily to shortcut floors.
+    
+    # add exception for B143, where Gor gives you a free locust if you have none? Or just ignore that.
+    
+    # don't forget that B222 skips a floor
+    
+    # how dungeon lists work is it's the floor data, but with an extra tag for if it's a main or not, and all grouped under the {DungeonName} key.
+    # If the dungeon is excluded by yaml option (either by name, or randomly via dungeon count), it checks the "Standalone" tag for if specific required floors can be added by themselves, without the entrance.
+    # Standalone floors become optional for that floor type (main or side)
+    # If the dungeon is included, all required dungeon floors are put into their respective required list.
+    # we cannot/shouldn't shuffle dungeon entrances?
+    # if floor shuffle, assume all dungeons that appear have checks
+    # figure out what to do if too many dungeons disabled, becuase then too many side branes are disabled?
+    
+    def generate_brane_list(self) -> None: 
+        pool_required_main = {}
+        pool_required_side = {}
+        pool_optional_main = {}
+        pool_optional_side = {}
+        pool_dungeons = {}
+        goal_dungeons = ["DIS"]
+        floor_pack_list = ["vanilla_floors"]
+        # if goal settings
+            # add dungeons to goal_dungeons
+        #if add community floor packs
+            #floor_pack_list.extend(self.options.EnabledFloors)
+        
+        for enabled_floor_pack in floor_pack_list:
+            floor_pack = importlib.import_module(f".Floors.{enabled_floor_pack}", package = __name__)
+            pool_required_main.update(floor_pack.RequiredMainBranes)
+            pool_required_side.update(floor_pack.RequiredSideBranes)
+            pool_optional_main.update(floor_pack.OptionalMainBranes)
+            pool_optional_side.update(floor_pack.OptionalSideBranes)
+            pool_dungeons.update(floor_pack.Dungeons)
+        
+        # when shuffle floors is off, excluded dungeons remain, but logic won't place anything there.
+        # when shuffle floors is on, excluding a dungeon will remove it's entrance and all related floors entirely
+        if False: #if shuffle floors
+            print("dummy line")
+            # if treasure hunter / ninnie (except always do this?)
+                # add first and last floors of their sequence to required, as well as 5 other random floors from their sequence
+                # then, put the rest of their sequence into optional
+            # edit brand and shortcut connections as necessary
+            # for dungeon not in goal_dungeons:
+                # etc
+            # for generation, include option for a floor to be "locked" behind the placement of another floor.
+            # aka, if a floor is placed, it pulls it's corrosponding floor from the locked pool
+            # also, allow for floors to be placed in any order, sometimes shortcuts taken first, sometimes not, etc
+            
+        else:
+            self.brane_order = Floors.vanilla_floors.VanillaBraneOrder
+            self.brane_list.update(pool_required_main)
+            self.brane_list.update(pool_required_side)
+            self.brane_list.update(pool_optional_main)
+            self.brane_list.update(pool_optional_side)
+            self.brane_list.update(Floors.vanilla_floors.VanillaDungeonEntrances)
+        
+        for brane in self.brane_list:
+            self.brane_list[brane].update({"Accessible": False, "Locust_Score": -1})
+        
+        # parse stair connections with "next"
+        for brane in self.brane_order:
+            if self.brane_list[brane]["Stairs"] != False:
+                if self.brane_list[brane]["Stairs"][0] == "next":
+                    if self.brane_order.index(brane) == 255:
+                        if False:   # if white void dungeon is enabled
+                            self.brane_list[brane]["Dungeon"] = ("white_void", self.brane_list[brane]["Stairs"][1])
+                        self.brane_list[brane]["Stairs"] = False
+                    else:
+                        self.brane_list[brane]["Stairs"] = (self.brane_order[self.brane_order.index(brane) + 1], self.brane_list[brane]["Stairs"][1]) # messy line to replace a tuple
+    
+    
+    # connection tuple format: (destination, [[option A item_tuples],[option B item_tuples]], running_locust_score)
+    def check_floor_connection(self, state, connection_tuple, current_brane, brane_index) -> tuple[bool, str, int|str]:
+        from .Rules import check_item_tuples
+        if self.brane_list[connection_tuple[0]]["Accessible"] == True and self.brane_list[connection_tuple[0]]["Locust_Score"] >= connection_tuple[2]:
+            #input("already been there")
+            #input(self.brane_list[connection_tuple[0]]["Locust_Score"])
+            #input(connection_tuple[2])
+            return False, current_brane, brane_index
+        #input("check_item_tuples")
+        if check_item_tuples(self, state, connection_tuple[1]):
+            #input(connection_tuple)
+            if connection_tuple[0] in self.brane_order:
+                brane_index = self.brane_order.index(connection_tuple[0])
+            else:
+                brane_index = "???"
+            return True, connection_tuple[0], brane_index
+        else:
+            self.blocked_connections.append(connection_tuple)
+            return False, current_brane, brane_index
+            
+    
+    def init_brane_accessibility(self, state: "CollectionState") -> None:
+        #from .Rules import has_item_by_type
+        shortcut_list = []          # connection tuples: (destination, [[option A item_tuples],[option B item_tuples]], running_locust_score)
+        # smilers are fulfilled when either the 99 next floors are reachable with a better locust score, or you can reach up to the next smiler with a better locust score
+        smiler_list = []            # tuples with format: (current_floor, [[option A item_tuples],[option B item_tuples]], running_locust_score, last_floor_checked)
+        interface_list = []         # tuples with format: (current_floor, [[option A item_tuples],[option B item_tuples]], running_locust_score, last_floor_checked)
+        
+        self.reset_brane_accessibility()
+        
+        if self.blocked_connections == []:
+            brane_index = self.brane_order.index("B001")
+            current_brane = "B001"
+            if self.options.locustsanity:
+                running_locust_score = state.prog_items[item.player]["locusts"]
+            else:
+                running_locust_score = 0
+            self.calculate_brane_accessibility(state, current_brane, brane_index, running_locust_score, shortcut_list, smiler_list, interface_list)
+            
+        else:
+            result = False
+            for connection in self.blocked_connections:
+                self.blocked_connections.remove(connection)
+                result, current_brane, brane_index = self.check_floor_connection(state, connection, "B001", 0)
+                if result:
+                    running_locust_score = connection[2]
+                    shortcut_list.extend(self.blocked_connections)
+                    self.blocked_connections.clear()
+                    break
+            #if not result:
+                #check smilers, then check interfaces
+            if result:
+                #print(self.blocked_connections)
+                #print(shortcut_list)
+                #print(current_brane)
+                #print(brane_index)
+                #input(running_locust_score)
+                input("ERROR")
+                self.calculate_brane_accessibility(state, current_brane, brane_index, running_locust_score, shortcut_list, smiler_list, interface_list)
+                
+                
+    def calculate_brane_accessibility(self, state: "CollectionState", current_brane, brane_index, running_locust_score, shortcut_list, smiler_list, interface_list) -> None:
+        while True:
+            #print(self.blocked_connections)
+            #print(shortcut_list)
+            #print(current_brane)
+            #print(brane_index)
+            #input(running_locust_score)
+            result = False
+            self.brane_list[current_brane]["Accessible"] = True
+            self.brane_list[current_brane]["Locust_Score"] = running_locust_score
+            
+            if not self.options.locustsanity:
+                running_locust_score += self.brane_list[current_brane]["Chest_Score"]
+                if running_locust_score > 99:
+                    running_locust_score = 99
+            
+            if self.brane_list[current_brane]["Shortcut"] != False:
+                # in case there are multiple shortcuts on the same floor
+                for shortcut in self.brane_list[current_brane]["Shortcut"]:
+                    shortcut_list.append((shortcut[0], shortcut[1], running_locust_score))
+            if self.brane_list[current_brane]["Smiler"] != False:
+                smiler_list.append((current_brane, self.brane_list[current_brane]["Smiler"], running_locust_score))
+            if self.brane_list[current_brane]["Interface"] != False:
+                interface_list.append((current_brane, self.brane_list[current_brane]["Interface"], running_locust_score))
+            if self.brane_list[current_brane]["Brand_Room"] != False:
+                for brand_carve in Floors.vanilla_floors.VanillaBrandCarving[current_brane]:
+                    shortcut_list.append((brand_carve[0], brand_carve[1], running_locust_score))
+            
+            if self.brane_list[current_brane]["Stairs"] != False:
+                # check for Skipped tag
+                result, current_brane, brane_index = self.check_floor_connection(state, (self.brane_list[current_brane]["Stairs"][0], self.brane_list[current_brane]["Stairs"][1], running_locust_score), current_brane, brane_index)
+                if result:
+                    continue
+            # do interface connections first?
+            if shortcut_list != []:
+                for shortcut in shortcut_list:
+                    result, current_brane, brane_index = self.check_floor_connection(state, shortcut, current_brane, brane_index)
+                    shortcut_list.remove(shortcut)
+                    if result:
+                        running_locust_score = shortcut[2]
+                        break
+                if result:
+                    continue
+            #for brane in self.brane_list:
+               #print(brane + " " + str(self.brane_list[brane]["Accessible"]))
+            #input()
+            break
+    
+    
+    def reset_brane_accessibility(self) -> None:
+        for brane in self.brane_list:
+            self.brane_list[brane].update({"Accessible": False, "Locust_Score": -1})
+        self.blocked_connections.clear()
+        self.incomplete_smilers.clear()
+        self.incomplete_interfaces.clear()
+    
+    #add update_locust_counts function
     def collect(self, state: "CollectionState", item: "Item") -> bool:
         change = super().collect(state, item)
         if change and item.name == ItemNames.locust_idol:
             state.prog_items[item.player]["locusts"] += 1
         elif change and item.name == ItemNames.tripled_locust:
             state.prog_items[item.player]["locusts"] += 3
+        self.init_brane_accessibility(state)
         return change
 
     def remove(self, state: "CollectionState", item: "Item") -> bool:
@@ -47,6 +254,8 @@ class VoidStrangerWorld(World):
             state.prog_items[item.player]["locusts"] -= 1
         elif change and item.name == ItemNames.tripled_locust:
             state.prog_items[item.player]["locusts"] -= 3
+        self.init_brane_accessibility(state)
+        input("Remove Function")
         return change
 
     def create_item(self, name: str) -> VoidStrangerItem:
@@ -160,6 +369,7 @@ class VoidStrangerWorld(World):
             region.add_exits(region_data_table[region_name].connecting_regions)
 
     def set_rules(self) -> None:
+        self.generate_brane_list()
         from .Rules import set_rules
         set_rules(self)
 
