@@ -6,6 +6,32 @@ from . import VoidStrangerWorld
 from .Constants import ItemNames, LocationNames
 from ..generic.Rules import set_rule, forbid_item, add_rule
 
+def floor_exists(world: VoidStrangerWorld, floor) -> bool:
+    if floor in world.brane_list:
+        return True
+    else:
+        return False
+
+def can_access_floor(world: VoidStrangerWorld, floor) -> bool:
+    return world.brane_list[floor]["Accessible"]
+
+def check_item_tuples(world: VoidStrangerWorld, state: CollectionState, item_groups) -> bool:
+    for item_list in item_groups:
+        result = True
+        for item_tuple in item_list:
+            result &= has_item_by_type(world, state, item_tuple[0], item_tuple[1])
+        if result:
+            return True
+    return False
+        
+# add "access" type which checks CanAccessFloor
+def has_item_by_type(world: VoidStrangerWorld, state: CollectionState, type: str, item: str) -> bool:
+    if type == "brand":
+        return has_brand(world, state, item)
+    elif type == "idol":
+        return has_idol(world, state, item)
+    elif type == "item":
+        return state.has(item, world.player)
 
 def has_brand(world: VoidStrangerWorld, state: CollectionState, brand: str) -> bool:
     if world.options.brandsanity:
@@ -60,18 +86,7 @@ def set_rules(world: VoidStrangerWorld):
     # goal logic decision
     world.multiworld.completion_condition[world.player] = \
         lambda state: ((state.has_all({ItemNames.interface_manip, ItemNames.void_memory, ItemNames.void_wings, ItemNames.void_sword, ItemNames.endless_void_rod}, world.player) and
-                        has_idol(world, state, "killer") and
-                        has_idol(world, state, "lover") and
-                        has_idol(world, state, "smiler") and
-                        has_brand(world, state, "add") and
-                        has_brand(world, state, "eus") and
-                        has_brand(world, state, "bee") and
-                        has_brand(world, state, "mon") and
-                        has_brand(world, state, "tan") and
-                        has_brand(world, state, "gor") and
-                        has_brand(world, state, "lev") and
-                        has_brand(world, state, "cif") and
-                        has_brand(world, state, "dis")))
+                        can_access_floor(world, "dis_entrance")))
 
     #Forbid item rules
     if world.options.brandsanity:
@@ -164,105 +179,53 @@ def set_rules(world: VoidStrangerWorld):
                            state.has(ItemNames.sloth_seal, world.player) and
                            state.has(ItemNames.interface_manip, world.player))
 
-    add_rule(world.multiworld.get_location(LocationNames.interface_manip_hint, world.player),
-             lambda state: state.has(ItemNames.void_memory, world.player))
-
     add_rule(world.multiworld.get_location(LocationNames.lust_slain, world.player),
-             lambda state: state.has_all({ItemNames.void_wings, ItemNames.void_sword}, world.player) and
-                           has_brand(world, state, "add"))
+             lambda state: can_access_floor(world, "B030") and state.has_all({ItemNames.void_wings, ItemNames.void_sword}, world.player))
 
     add_rule(world.multiworld.get_location(LocationNames.sloth_slain, world.player),
-             lambda state: state.has(ItemNames.void_sword, world.player) and
-                           has_brand(world, state, "add") and
-                           has_brand(world, state, "eus") and
-                           has_brand(world, state, "bee") and
-                           has_brand(world, state, "mon") and
-                           has_brand(world, state, "tan") and
-                           has_idol(world, state, "killer"))
+             lambda state: can_access_floor(world, "B143") and state.has(ItemNames.void_sword, world.player))
              
              
     add_rule(world.multiworld.get_location(LocationNames.burden_chest1, world.player),
-             lambda state: has_brand(world, state, "add"))
+             lambda state: can_access_floor(world, "room_add"))
     
     add_rule(world.multiworld.get_location(LocationNames.burden_chest2, world.player),
-             lambda state: has_brand(world, state, "add") and
-                           has_brand(world, state, "eus") and
-                           has_brand(world, state, "bee"))
+             lambda state: can_access_floor(world, "room_bee"))
     
     add_rule(world.multiworld.get_location(LocationNames.burden_chest3, world.player),
-             lambda state: has_brand(world, state, "add") and
-                           has_brand(world, state, "eus") and
-                           has_brand(world, state, "bee") and
-                           has_brand(world, state, "mon") and
-                           has_brand(world, state, "tan") and
-                           has_idol(world, state, "killer"))
+             lambda state: can_access_floor(world, "room_tan") and state.has(ItemNames.void_sword, world.player))
     
     add_rule(world.multiworld.get_location(LocationNames.interface_manip_hint, world.player),
-             lambda state: has_brand(world, state, "add") and
-                           has_brand(world, state, "eus") and
-                           has_brand(world, state, "bee") and
-                           has_brand(world, state, "mon") and
-                           has_brand(world, state, "tan") and
-                           has_brand(world, state, "gor") and
-                           has_idol(world, state, "killer"))
+             lambda state: can_access_floor(world, "room_gor") and state.has(ItemNames.void_memory, world.player))
 
     #brandsanity locations
     if world.options.brandsanity:
+        add_rule(world.multiworld.get_location(LocationNames.mural_add, world.player),
+                 lambda state: can_access_floor(world, "B001"))
+                 
         add_rule(world.multiworld.get_location(LocationNames.mural_eus, world.player),
-                 lambda state: has_brand(world, state, "add"))
+                 lambda state: can_access_floor(world, "B029"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_bee, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus"))
+                 lambda state: can_access_floor(world, "B057"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_mon, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee"))
+                 lambda state: can_access_floor(world, "B085"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_tan, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               has_brand(world, state, "mon"))
+                 lambda state: can_access_floor(world, "B113"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_gor, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               has_brand(world, state, "mon") and
-                               has_brand(world, state, "tan") and
-                               has_idol(world, state, "killer"))
+                 lambda state: can_access_floor(world, "B141"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_lev, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               has_brand(world, state, "mon") and
-                               has_brand(world, state, "tan") and
-                               has_brand(world, state, "gor") and
-                               has_idol(world, state, "killer"))
+                 lambda state: can_access_floor(world, "B169"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_cif, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               has_brand(world, state, "mon") and
-                               has_brand(world, state, "tan") and
-                               has_brand(world, state, "gor") and
-                               has_brand(world, state, "lev") and
-                               has_idol(world, state, "killer"))
+                 lambda state: can_access_floor(world, "B197"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_dis, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               has_brand(world, state, "mon") and
-                               has_brand(world, state, "tan") and
-                               has_brand(world, state, "gor") and
-                               has_brand(world, state, "lev") and
-                               has_brand(world, state, "cif") and
-                               has_idol(world, state, "killer"))
+                 lambda state: can_access_floor(world, "B225"))
 
     #idolsanity locations
     if world.options.idolsanity:
@@ -290,35 +253,19 @@ def set_rules(world: VoidStrangerWorld):
     #shortcutsanity locations
     if world.options.shortcutsanity:
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut1, world.player),
-                 lambda state: check_shortcut_cheating(world, state, 5, 3))
+                 lambda state: can_access_floor(world, "B004") and check_shortcut_cheating(world, state, 5, 3))
                  
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut2, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               check_shortcut_cheating(world, state, 4, 21))
+                 lambda state: can_access_floor(world, "B044") and check_shortcut_cheating(world, state, 4, 21))
         
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut3, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               check_shortcut_cheating(world, state, 3, 49))
+                 lambda state: can_access_floor(world, "B086") and check_shortcut_cheating(world, state, 3, 49))
 
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut4, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               has_brand(world, state, "mon") and
-                               has_idol(world, state, "killer") and
-                               check_shortcut_cheating(world, state, 2, 56))
+                 lambda state: can_access_floor(world, "B124") and check_shortcut_cheating(world, state, 2, 56))
     
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut5, world.player),
-                 lambda state: has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               has_brand(world, state, "mon") and
-                               has_brand(world, state, "tan") and
-                               has_brand(world, state, "gor") and
-                               has_idol(world, state, "killer") and
-                               check_shortcut_cheating(world, state, 1, 77))
+                 lambda state: can_access_floor(world, "B196") and check_shortcut_cheating(world, state, 1, 77))
         
     #locustsanity locations
     if world.options.locustsanity:
