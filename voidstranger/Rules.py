@@ -12,8 +12,10 @@ def floor_exists(world: VoidStrangerWorld, floor) -> bool:
     else:
         return False
 
-def can_access_floor(world: VoidStrangerWorld, floor) -> bool:
-    return world.brane_list[floor]["Accessible"]
+def can_access_floor(world: VoidStrangerWorld, state: CollectionState, floor) -> bool:
+    if not world.multiworld.state.vs_stale_pathfinding[world.player]:
+        world.calculate_accessibility(state)
+    return world.multiworld.state.vs_brane_list[world.player][floor]["Accessible"]
 
 def check_item_tuples(world: VoidStrangerWorld, state: CollectionState, item_groups) -> bool:
     for item_list in item_groups:
@@ -30,6 +32,8 @@ def has_item_by_type(world: VoidStrangerWorld, state: CollectionState, type: str
         return has_brand(world, state, item)
     elif type == "idol":
         return has_idol(world, state, item)
+    elif type == "shortcut":
+        return has_shortcut(world, state, item)
     elif type == "item":
         return state.has(item, world.player)
 
@@ -66,7 +70,21 @@ def has_idol(world: VoidStrangerWorld, state: CollectionState, statue: str) -> b
             return state.has(ItemNames.enable_killer, world.player)
         elif statue == "watcher":
             return state.has(ItemNames.enable_watcher, world.player)
-
+    else:
+        return True
+        
+def has_shortcut(world: VoidStrangerWorld, state: CollectionState, shortcut: str) -> bool:
+    if world.options.shortcutsanity:
+        if shortcut == "mon1":
+            return state.has(ItemNames.shortcut1, world.player)
+        elif shortcut == "mon2":
+            return state.has(ItemNames.shortcut2, world.player)
+        elif shortcut == "mon3":
+            return state.has(ItemNames.shortcut3, world.player)
+        elif shortcut == "mon4":
+            return state.has(ItemNames.shortcut4, world.player)
+        elif shortcut == "mon5":
+            return state.has(ItemNames.shortcut5, world.player)
     else:
         return True
         
@@ -86,7 +104,7 @@ def set_rules(world: VoidStrangerWorld):
     # goal logic decision
     world.multiworld.completion_condition[world.player] = \
         lambda state: ((state.has_all({ItemNames.interface_manip, ItemNames.void_memory, ItemNames.void_wings, ItemNames.void_sword, ItemNames.endless_void_rod}, world.player) and
-                        can_access_floor(world, "dis_entrance")))
+                        can_access_floor(world, state, "dis_entrance")))
 
     #Forbid item rules
     if world.options.brandsanity:
@@ -180,52 +198,52 @@ def set_rules(world: VoidStrangerWorld):
                            state.has(ItemNames.interface_manip, world.player))
 
     add_rule(world.multiworld.get_location(LocationNames.lust_slain, world.player),
-             lambda state: can_access_floor(world, "B030") and state.has_all({ItemNames.void_wings, ItemNames.void_sword}, world.player))
+             lambda state: can_access_floor(world, state, "B030") and state.has_all({ItemNames.void_wings, ItemNames.void_sword}, world.player))
 
     add_rule(world.multiworld.get_location(LocationNames.sloth_slain, world.player),
-             lambda state: can_access_floor(world, "B143") and state.has(ItemNames.void_sword, world.player))
+             lambda state: can_access_floor(world, state, "B143") and state.has(ItemNames.void_sword, world.player))
              
              
     add_rule(world.multiworld.get_location(LocationNames.burden_chest1, world.player),
-             lambda state: can_access_floor(world, "room_add"))
+             lambda state: can_access_floor(world, state, "room_add"))
     
     add_rule(world.multiworld.get_location(LocationNames.burden_chest2, world.player),
-             lambda state: can_access_floor(world, "room_bee"))
+             lambda state: can_access_floor(world, state, "room_bee"))
     
     add_rule(world.multiworld.get_location(LocationNames.burden_chest3, world.player),
-             lambda state: can_access_floor(world, "room_tan") and state.has(ItemNames.void_sword, world.player))
+             lambda state: can_access_floor(world, state, "room_tan") and state.has(ItemNames.void_sword, world.player))
     
     add_rule(world.multiworld.get_location(LocationNames.interface_manip_hint, world.player),
-             lambda state: can_access_floor(world, "room_gor") and state.has(ItemNames.void_memory, world.player))
+             lambda state: can_access_floor(world, state, "room_gor") and state.has(ItemNames.void_memory, world.player))
 
     #brandsanity locations
     if world.options.brandsanity:
         add_rule(world.multiworld.get_location(LocationNames.mural_add, world.player),
-                 lambda state: can_access_floor(world, "B001"))
+                 lambda state: can_access_floor(world, state, "B001"))
                  
         add_rule(world.multiworld.get_location(LocationNames.mural_eus, world.player),
-                 lambda state: can_access_floor(world, "B029"))
+                 lambda state: can_access_floor(world, state, "B029"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_bee, world.player),
-                 lambda state: can_access_floor(world, "B057"))
+                 lambda state: can_access_floor(world, state, "B057"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_mon, world.player),
-                 lambda state: can_access_floor(world, "B085"))
+                 lambda state: can_access_floor(world, state, "B085"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_tan, world.player),
-                 lambda state: can_access_floor(world, "B113"))
+                 lambda state: can_access_floor(world, state, "B113"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_gor, world.player),
-                 lambda state: can_access_floor(world, "B141"))
+                 lambda state: can_access_floor(world, state, "B141"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_lev, world.player),
-                 lambda state: can_access_floor(world, "B169"))
+                 lambda state: can_access_floor(world, state, "B169"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_cif, world.player),
-                 lambda state: can_access_floor(world, "B197"))
+                 lambda state: can_access_floor(world, state, "B197"))
 
         add_rule(world.multiworld.get_location(LocationNames.mural_dis, world.player),
-                 lambda state: can_access_floor(world, "B225"))
+                 lambda state: can_access_floor(world, state, "B225"))
 
     #idolsanity locations
     if world.options.idolsanity:
@@ -253,19 +271,19 @@ def set_rules(world: VoidStrangerWorld):
     #shortcutsanity locations
     if world.options.shortcutsanity:
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut1, world.player),
-                 lambda state: can_access_floor(world, "B004") and check_shortcut_cheating(world, state, 5, 3))
+                 lambda state: can_access_floor(world, state, "B004") and check_shortcut_cheating(world, state, 5, 3))
                  
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut2, world.player),
-                 lambda state: can_access_floor(world, "B044") and check_shortcut_cheating(world, state, 4, 21))
+                 lambda state: can_access_floor(world, state, "B044") and check_shortcut_cheating(world, state, 4, 21))
         
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut3, world.player),
-                 lambda state: can_access_floor(world, "B086") and check_shortcut_cheating(world, state, 3, 49))
+                 lambda state: can_access_floor(world, state, "B086") and check_shortcut_cheating(world, state, 3, 49))
 
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut4, world.player),
-                 lambda state: can_access_floor(world, "B124") and check_shortcut_cheating(world, state, 2, 56))
+                 lambda state: can_access_floor(world, state, "B124") and check_shortcut_cheating(world, state, 2, 56))
     
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut5, world.player),
-                 lambda state: can_access_floor(world, "B196") and check_shortcut_cheating(world, state, 1, 77))
+                 lambda state: can_access_floor(world, state, "B196") and check_shortcut_cheating(world, state, 1, 77))
         
     #locustsanity locations
     if world.options.locustsanity:
