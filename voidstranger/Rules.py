@@ -6,17 +6,23 @@ from . import VoidStrangerWorld
 from .Constants import ItemNames, LocationNames
 from ..generic.Rules import set_rule, forbid_item, add_rule
 
+# checks if a floor exists
+# currently unused
 def floor_exists(world: VoidStrangerWorld, floor) -> bool:
     if floor in world.brane_list:
         return True
     else:
         return False
 
+# high-level: runs the pathfinder if it's stale
+# checks if a floor was tagged as accessible
 def can_access_floor(world: VoidStrangerWorld, state: CollectionState, floor: str) -> bool:
     if not state.vs_stale_pathfinding[world.player]:
         world.calculate_accessibility(state)
     return state.vs_brane_list[world.player][floor]["Accessible"]
-    
+
+# high-level: runs the pathfinder if it's stale
+# checks if a floor was tagged as accessible and also has a certain locust score or better
 def can_access_floor_with_locusts(world: VoidStrangerWorld, state: CollectionState, floor: str, locust_count: int) -> bool:
     if can_access_floor(world, state, floor):
         if state.vs_brane_list[world.player][floor]["Locust_Score"] >= locust_count:
@@ -24,7 +30,19 @@ def can_access_floor_with_locusts(world: VoidStrangerWorld, state: CollectionSta
     else:
         return False
 
+# high-level: runs the pathfinder if it's stale
+# checks if any floors are accessible on a pre-generated list of floors that contain the specified statue and if that statue is reachable
+def can_access_idol(world: VoidStrangerWorld, state: CollectionState, statue: str) -> bool:
+    if not state.vs_stale_pathfinding[world.player]:
+        world.calculate_accessibility(state)
+    if state.has(ItemNames.void_memory, world.player) and has_idol(world, state, statue): #remove this check if we change how idol locations work
+        for floor in state.vs_statue_floors[world.player][statue]:
+            if can_access_floor(world, state, floor) and check_item_tuples(world, state, state.vs_brane_list[world.player][floor]["Statues"][statue]):
+                return True
+    return False
 
+# checks lists of item combinations and returns true if any of the combinations is collected
+# item tuple format: [[(item_category,item),(other item tuple)],[other valid item combination]]
 def check_item_tuples(world: VoidStrangerWorld, state: CollectionState, item_groups) -> bool:
     for item_list in item_groups:
         result = True
@@ -34,7 +52,9 @@ def check_item_tuples(world: VoidStrangerWorld, state: CollectionState, item_gro
             return True
     return False
         
-# add "access" type which checks CanAccessFloor
+# generic item checking function
+# allows for item tuples with different types of "item" fields
+# add "access" type which checks CanAccessFloor?
 def has_item_by_type(world: VoidStrangerWorld, state: CollectionState, type: str, item: str) -> bool:
     if type == "brand":
         return has_brand(world, state, item)
@@ -45,6 +65,7 @@ def has_item_by_type(world: VoidStrangerWorld, state: CollectionState, type: str
     elif type == "item":
         return state.has(item, world.player)
 
+# checks if brandsanity is on, and if so, whether the specified brand is collected
 def has_brand(world: VoidStrangerWorld, state: CollectionState, brand: str) -> bool:
     if world.options.brandsanity:
         if brand == "add":
@@ -68,21 +89,31 @@ def has_brand(world: VoidStrangerWorld, state: CollectionState, brand: str) -> b
     else:
         return True
 
+# checks if idolsanity is on, and if so, whether the specified statue is collected
 def has_idol(world: VoidStrangerWorld, state: CollectionState, statue: str) -> bool:
     if world.options.idolsanity:
         if statue == "lover":
             return state.has(ItemNames.enable_lover, world.player)
         elif statue == "smiler":
             return state.has(ItemNames.enable_smiler, world.player)
+        elif statue == "greeder":
+            #unimplemented
+            #return state.has(ItemNames.enable_greeder, world.player)
+            return True
         elif statue == "killer":
             return state.has(ItemNames.enable_killer, world.player)
+        elif statue == "slower":
+            #unimplemented
+            #return state.has(ItemNames.enable_slower, world.player)
+            return True
         elif statue == "watcher":
             #unimplemented
             #return state.has(ItemNames.enable_watcher, world.player)
             return True
     else:
         return True
-        
+
+# checks if shortcutsanity is on, and if so, whether the specified shortcut is collected
 def has_shortcut(world: VoidStrangerWorld, state: CollectionState, shortcut: str) -> bool:
     if world.options.shortcutsanity:
         if shortcut == "mon1":
@@ -97,13 +128,16 @@ def has_shortcut(world: VoidStrangerWorld, state: CollectionState, shortcut: str
             return state.has(ItemNames.shortcut5, world.player)
     else:
         return True
-        
+
+# depreciated function
+# can delete?
 def has_locust_count(world: VoidStrangerWorld, state: CollectionState, required: int) -> bool:
     if world.options.locustsanity:
         return state.has("locusts", world.player, required)
     else:
         return True
 
+# processes shortcutcheating option
 def check_shortcut_cheating(world: VoidStrangerWorld, state: CollectionState, shortcut: int, required: int) -> bool:
     if world.options.locustsanity and world.options.shortcutsanity and world.options.shortcutcheating >= shortcut:
         if not state.has(ItemNames.interface_manip, world.player):
@@ -114,7 +148,8 @@ def set_rules(world: VoidStrangerWorld):
     # goal logic decision
     world.multiworld.completion_condition[world.player] = \
         lambda state: ((state.has_all({ItemNames.interface_manip, ItemNames.void_memory, ItemNames.void_wings, ItemNames.void_sword, ItemNames.endless_void_rod}, world.player) and
-                        can_access_floor(world, state, "dis_entrance")))
+                        can_access_floor(world, state, "dis_entrance") and
+                        has_idol(world, state, "lover") and has_idol(world, state, "greeder") and has_idol(world, state, "killer") and has_idol(world, state, "watcher")))
 
     #Forbid item rules
     if world.options.brandsanity:
@@ -203,7 +238,8 @@ def set_rules(world: VoidStrangerWorld):
 
     #base locations
     set_rule(world.multiworld.get_location(LocationNames.endless_void_rod_chest, world.player),
-             lambda state: state.has(ItemNames.lust_seal, world.player) and
+             lambda state: can_access_floor(world, state, "B028") and # change floor to B000 after UI manip added
+                           state.has(ItemNames.lust_seal, world.player) and
                            state.has(ItemNames.sloth_seal, world.player) and
                            state.has(ItemNames.interface_manip, world.player))
 
@@ -256,28 +292,15 @@ def set_rules(world: VoidStrangerWorld):
                  lambda state: can_access_floor(world, state, "B225"))
 
     #idolsanity locations
-    #UPDATE LOGIC
     if world.options.idolsanity:
         add_rule(world.multiworld.get_location(LocationNames.statue_lover, world.player),
-                 lambda state: state.has(ItemNames.void_memory, world.player) and (
-                                  state.has(ItemNames.void_wings, world.player) or
-                                  state.has(ItemNames.endless_void_rod, world.player)) and
-                               has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_idol(world, state, "lover"))
+                 lambda state: can_access_idol(world, state, "lover"))
 
         add_rule(world.multiworld.get_location(LocationNames.statue_smiler, world.player),
-                 lambda state: state.has(ItemNames.void_memory, world.player) and
-                               has_idol(world, state, "smiler"))
+                 lambda state: can_access_idol(world, state, "smiler"))
     
         add_rule(world.multiworld.get_location(LocationNames.statue_killer, world.player),
-                 lambda state: state.has(ItemNames.void_memory, world.player) and
-                               has_brand(world, state, "add") and
-                               has_brand(world, state, "eus") and
-                               has_brand(world, state, "bee") and
-                               has_brand(world, state, "mon") and
-                               has_brand(world, state, "tan") and
-                               has_idol(world, state, "killer"))
+                 lambda state: can_access_idol(world, state, "killer"))
 
     #shortcutsanity locations
     if world.options.shortcutsanity:
