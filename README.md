@@ -59,16 +59,14 @@ happening.
 be properly unlocked in game. Closing and reopening the game should fix this. Sometimes it might happen outside the 
 menus, the same fix will work for that too.
 
-3. The tracker shows a slightly incorrect image for Gor's brand. 
-
-4. The greed zone might not open properly the first time, it's unclear from the small amount of testing done. If you run
+3. The greed zone might not open properly the first time, it's unclear from the small amount of testing done. If you run
  into this issue then reconnecting should fix it. 
 
-5. There is a bug with how the game is recompiled by UMT that can cause crashes when a textbox displays with different 
+4. There is a bug with how the game is recompiled by UMT that can cause crashes when a textbox displays with different 
 dialogue sounds. I fixed all the ones needed to complete a run, but I'm sure there are other instances of this across 
 the game. If you run into this please provide the crash message, so I can fix it.
 
-6. There has been a report of progressive brands not being received properly due to multiple being sent at once from a
+5. There has been a report of progressive brands not being received properly due to multiple being sent at once from a
 release, reconnecting resolves the issue.
 
 If you run into an issue not on this list, try reconnecting to the AP server. Regardless of if this resolves the issue, 
@@ -138,9 +136,7 @@ requires exactly one item and its annoying to reach unless you play as Cif. We c
 3. Getting multiple endings to goal, something like "reach three endings" and then the player can choose which ones to 
 reach.
 
-4. Add an option for all kinds of shortcuts being accounted for in logic with brandsanity
-
-5. MAYBE more locations, but many ideas I've seen (memento crystals mainly) have one big issue: there aren't any more 
+4. MAYBE more locations, but many ideas I've seen (memento crystals mainly) have one big issue: there aren't any more 
 items left to place in those locations. Perhaps I could let the player choose locust chests or memento crystals as 
 locations, but not both. There are already way too many locust items in the pool as it is.
 
@@ -148,9 +144,9 @@ Notable ideas include:
 - The 9 reachable chests in the Voided sequence
 - Bottom of the white void
 
-6. Gor cube as an alternate location instead of the normal kill
+5. Gor cube as an alternate location instead of the normal kill
 
-7. Possibly shuffling in new player dungeons and floors to remix things up?
+6. Possibly shuffling in new player dungeons and floors to remix things up?
 
 
 ## Special Thanks
@@ -163,5 +159,4 @@ brainstorming ideas.
 [@LeonarthCG](https://github.com/LeonarthCG) - For helping a massive amount with the gamemaker net code side of things 
 (and of course working on that library in the first place!).
 
-[@Cavin856](https://github.com/Cavin856) - For help with bugfixes and adding several improvements and features to the 
-mod.
+[@Cavin856](https://github.com/Cavin856) - Feature implementation, bug fixes, and the entire logic rewrite
