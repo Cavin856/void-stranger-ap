@@ -53,16 +53,16 @@ statue_item_data_table: Dict[str, VoidStrangerItemData] = {
 }
 
 shortcut_item_data_table: Dict[str, VoidStrangerItemData] = {
-    ItemNames.shortcut1: VoidStrangerItemData(void_stranger_base_id + 20, ItemClassification.useful),
-    ItemNames.shortcut2: VoidStrangerItemData(void_stranger_base_id + 21, ItemClassification.useful),
-    ItemNames.shortcut3: VoidStrangerItemData(void_stranger_base_id + 22, ItemClassification.useful),
-    ItemNames.shortcut4: VoidStrangerItemData(void_stranger_base_id + 23, ItemClassification.useful),
-    ItemNames.shortcut5: VoidStrangerItemData(void_stranger_base_id + 24, ItemClassification.useful)
+    ItemNames.shortcut1: VoidStrangerItemData(void_stranger_base_id + 20, ItemClassification.progression),
+    ItemNames.shortcut2: VoidStrangerItemData(void_stranger_base_id + 21, ItemClassification.progression),
+    ItemNames.shortcut3: VoidStrangerItemData(void_stranger_base_id + 22, ItemClassification.progression),
+    ItemNames.shortcut4: VoidStrangerItemData(void_stranger_base_id + 23, ItemClassification.progression),
+    ItemNames.shortcut5: VoidStrangerItemData(void_stranger_base_id + 24, ItemClassification.progression)
 }
 
 locust_item_table: Dict[str, VoidStrangerItemData] = {
-    ItemNames.locust_idol: VoidStrangerItemData(void_stranger_base_id + 25, ItemClassification.deprioritized), #42 for Gray, 40 for Lillith
-    ItemNames.tripled_locust: VoidStrangerItemData(void_stranger_base_id + 26, ItemClassification.deprioritized) #26 for Gray, 29 for Lillith
+    ItemNames.locust_idol: VoidStrangerItemData(void_stranger_base_id + 25, ItemClassification.progression), #42 for Gray, 40 for Lillith
+    ItemNames.tripled_locust: VoidStrangerItemData(void_stranger_base_id + 26, ItemClassification.progression) #26 for Gray, 29 for Lillith
 }
 
 greed_coin_item_table: Dict[str, VoidStrangerItemData] = {

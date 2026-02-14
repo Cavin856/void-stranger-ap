@@ -1,0 +1,61 @@
+KNOWN MAJOR ISSUES:
+	Currently, Waypoints do not properly restore Mon Bank values
+	This will be fixed in the v0.9.2.0 major update
+
+
+
+v0.9.1.0
+	General:
+		New file "ap_room_name.csv" is now required
+		
+	Waypoints Menu:
+		New AP Menu Page
+		Three waypoint slots which can be set and then warped to at any time for convenience
+		Stores locust count and floor, restoring both on warp
+		Can only save waypoint on numbered branes
+		Each brane has a unique WIP name/description
+	
+	Debug Menu:
+		New AP Menu Page
+		Displays several internal variables
+		Should be helpful debugging
+		If items aren't being received, are wiped, or you disconnect randomly, send a screenshot of the debug screen to the discord
+	
+	Connection Menu:
+		Now raises errors and prevents connection if AP files are missing (instead of crashing)
+		Input fields now allow strings longer than game width, up to 100 characters
+		Added end-of-line indicator
+	
+	Tracker Menu:
+		Added (temporary) counter for Greed Coins
+	
+	Bugfixes:
+		End Run now resets (some) AP values
+		
+	Misc:
+		Changed version number format
+
+
+
+v0.9.0.0
+	Logic:
+		Rewrote logic to include Shortcuts and Brand Carves
+		Shortcuts are now classified as Progression
+		Locusts are again classified as Progression
+	
+	Yaml:
+		Added new option "Logic Complexity" to Yaml
+		Misc formatting adjustments to Yaml descriptions
+		ShortcutCheating now functions independant of Locustsanity
+		Certain invalid option combinations now raise errors before generation
+	
+	Tan:
+		Burden Chest 3 is now sent when killing Tan, rather than opening the chest
+		Tan's chamber now requires killers to exit, as in vanilla
+	
+	Tracker:
+		Gor's brand is now fixed on the Tracker Menu
+		Very minor visual adjustments to the Tracker Menu
+	
+	Misc:
+		Moved the DIS Interface check to the second room of DIS, instead of the DIS brand carve room

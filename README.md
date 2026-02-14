@@ -46,7 +46,7 @@ and replace the existing data.win file with the patched one, still named data.wi
 of the original data.win file as a backup in case at any point you need to patch the game again (When the patch is 
 updated with new content or a fix)
 
-Finally, be sure to add the gm-apclientpp.dll to the Void Stranger folder
+Finally, be sure to add gm-apclientpp.dll and ap_room_names.csv to the Void Stranger folder
 
 ## AP Menu
 
@@ -54,22 +54,37 @@ If the game was patched successfully, you can open the AP menu by pushing F10 or
 The AP menu has three pages, which can be navigated with left and right.
 
 - Connection page
+
   This is the default page. Here you can input the connection details to connect to the AP server.
   Press Tab to move to the next field, Delete to clear the current field, and Enter to connect to AP.
   Your most recent connection will be saved.
 
 - Mon Bank page
+
   Any locusts you receive from AP are sent here (if Locust-Sanity is turned on). Up/Down to navigate the options.
   You can withdraw and throw out locusts at will. Throwing out locusts DOES NOT deposit them back into the bank.
   Upon Atoning, your locust count resets as well as the amount withdrawn, but not the amount received.
   For rando balance reasons, you cannot withdraw if that would cause you to hold more than you've received.
 
 - Tracker page
+
   This page keeps track of all the items you've received.
   Top row is brands, middle row is statues (only three are implemented), bottom row in order is:
   Void Memory, Seal of Lust, Void Wings, Mon Badge (Unimplemented), Void Sword, Seal of Sloth, Void Rod, Interface Manip
   Shortcuts will show up on the right hand side with the shortcut number and an image depicting it.
   The DIS Brand appears as a large DIS Badge between the three rows and the shortcuts, if you have it.
+
+- Waypoints page
+
+  This page allows you to set up to three simultanious waypoints and warp back to them at will.
+  Waypoints restore your locust count to what it was when the waypoint was made.
+  Waypoints can only be set on numbered branes.
+
+- Debug page
+
+  Shows several interal variables used for debugging.
+  If something clearly wrong occurs with your AP connection, or some items seem to vanish from your inventory,
+  please ping @Cavin856 with a screenshot of the debug page in the Void Stranger channel in the AP discord.
 
 ## Known bugs
 
@@ -82,16 +97,14 @@ happening.
 be properly unlocked in game. Closing and reopening the game should fix this. Sometimes it might happen outside the 
 menus, the same fix will work for that too.
 
-3. The tracker shows a slightly incorrect image for Gor's brand. 
-
-4. The greed zone might not open properly the first time, it's unclear from the small amount of testing done. If you run
+3. The greed zone might not open properly the first time, it's unclear from the small amount of testing done. If you run
  into this issue then reconnecting should fix it. 
 
-5. There is a bug with how the game is recompiled by UMT that can cause crashes when a textbox displays with different 
+4. There is a bug with how the game is recompiled by UMT that can cause crashes when a textbox displays with different 
 dialogue sounds. I fixed all the ones needed to complete a run, but I'm sure there are other instances of this across 
 the game. If you run into this please provide the crash message, so I can fix it.
 
-6. There has been a report of progressive brands not being received properly due to multiple being sent at once from a
+5. There has been a report of progressive brands not being received properly due to multiple being sent at once from a
 release, reconnecting resolves the issue.
 
 If you run into an issue not on this list, try reconnecting to the AP server. Regardless of if this resolves the issue, 
@@ -186,6 +199,5 @@ brainstorming ideas.
 [@LeonarthCG](https://github.com/LeonarthCG) - For helping a massive amount with the gamemaker net code side of things 
 (and of course working on that library in the first place!).
 
-[@Cavin856](https://github.com/Cavin856) - For help with bugfixes and adding several improvements and features to the 
-mod.
+[@Cavin856](https://github.com/Cavin856) -  Feature implementations & bug fixes.
 
