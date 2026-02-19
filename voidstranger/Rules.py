@@ -19,14 +19,13 @@ def floor_exists(world: VoidStrangerWorld, floor) -> bool:
 def can_access_floor(world: VoidStrangerWorld, state: CollectionState, floor: str) -> bool:
     if state.vs_stale_pathfinding[world.player]:
         world.calculate_accessibility(state)
-    #print(world.player)
     return state.vs_brane_accessibility[world.player][floor]["Accessible"]
 
 # high-level: runs the pathfinder if it's stale
 # checks if a floor was tagged as accessible and also has a certain locust score or better
 def can_access_floor_with_locusts(world: VoidStrangerWorld, state: CollectionState, floor: str, locust_count: int) -> bool:
     if can_access_floor(world, state, floor):
-        if state.vs_brane_accessibility[world.player][floor]["Locust_Score"] >= locust_count or state.has(ItemNames.interface_manip, world.player):
+        if state.vs_brane_accessibility[world.player][floor]["Locust_Score"] >= locust_count:
             return True
     else:
         return False
@@ -130,14 +129,6 @@ def has_shortcut(world: VoidStrangerWorld, state: CollectionState, shortcut: str
     else:
         return True
 
-# deprecated function
-# can delete?
-def has_locust_count(world: VoidStrangerWorld, state: CollectionState, required: int) -> bool:
-    if world.options.locustsanity:
-        return state.has("locusts", world.player, required)
-    else:
-        return True
-
 # processes shortcutcheating option
 def check_shortcut_cheating(world: VoidStrangerWorld, state: CollectionState, shortcut: int) -> bool:
     if world.options.shortcutcheating >= shortcut and not state.has(ItemNames.interface_manip, world.player):
@@ -150,7 +141,7 @@ def set_rules(world: VoidStrangerWorld):
     world.multiworld.completion_condition[world.player] = \
         lambda state: ((state.has_all({ItemNames.interface_manip, ItemNames.void_memory, ItemNames.void_wings, ItemNames.void_sword, ItemNames.endless_void_rod}, world.player) and
                         can_access_floor(world, state, "dis_entrance") and
-                        has_idol(world, state, "lover") and has_idol(world, state, "greeder") and has_idol(world, state, "killer") and has_idol(world, state, "watcher")))
+                        has_idol(world, state, "lover") and has_idol(world, state, "smiler") and has_idol(world, state, "greeder") and has_idol(world, state, "killer") and has_idol(world, state, "watcher")))
 
     #Forbid item rules
     if world.options.brandsanity:
@@ -192,9 +183,7 @@ def set_rules(world: VoidStrangerWorld):
     #base locations
     set_rule(world.multiworld.get_location(LocationNames.endless_void_rod_chest, world.player),
              lambda state: can_access_floor(world, state, "B028") and # change floor to B000 after UI manip added
-                           state.has(ItemNames.lust_seal, world.player) and
-                           state.has(ItemNames.sloth_seal, world.player) and
-                           state.has(ItemNames.interface_manip, world.player))
+                           state.has_all({ItemNames.lust_seal, ItemNames.sloth_seal, ItemNames.interface_manip}, world.player))
 
     add_rule(world.multiworld.get_location(LocationNames.lust_slain, world.player),
              lambda state: can_access_floor(world, state, "B030") and state.has_all({ItemNames.void_wings, ItemNames.void_sword}, world.player))
