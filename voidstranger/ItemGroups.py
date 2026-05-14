@@ -20,5 +20,4 @@ vs_item_groups = {
     "Lev's Brand": {ItemNames.brand_lev},
     "Cif's Brand": {ItemNames.brand_cif},
     "DIS's Brand": {ItemNames.brand_dis},
-    "Progressive Brand": {ItemNames.brand_prog},
     }

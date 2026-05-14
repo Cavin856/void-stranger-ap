@@ -69,23 +69,23 @@ def has_item_by_type(world: VoidStrangerWorld, state: CollectionState, type: str
 def has_brand(world: VoidStrangerWorld, state: CollectionState, brand: str) -> bool:
     if world.options.brandsanity:
         if brand == "add":
-            return state.has_any_count({ItemNames.brand_add: 1, ItemNames.brand_prog: 1}, world.player)
+            return state.has(ItemNames.brand_add, world.player)
         elif brand == "eus":
-            return state.has_any_count({ItemNames.brand_eus: 1, ItemNames.brand_prog: 2}, world.player)
+            return state.has(ItemNames.brand_eus, world.player)
         elif brand == "bee":
-            return state.has_any_count({ItemNames.brand_bee: 1, ItemNames.brand_prog: 3}, world.player)
+            return state.has(ItemNames.brand_bee, world.player)
         elif brand == "mon":
-            return state.has_any_count({ItemNames.brand_mon: 1, ItemNames.brand_prog: 4}, world.player)
+            return state.has(ItemNames.brand_mon, world.player)
         elif brand == "tan":
-            return state.has_any_count({ItemNames.brand_tan: 1, ItemNames.brand_prog: 5}, world.player)
+            return state.has(ItemNames.brand_tan, world.player)
         elif brand == "gor":
-            return state.has_any_count({ItemNames.brand_gor: 1, ItemNames.brand_prog: 6}, world.player)
+            return state.has(ItemNames.brand_gor, world.player)
         elif brand == "lev":
-            return state.has_any_count({ItemNames.brand_lev: 1, ItemNames.brand_prog: 7}, world.player)
+            return state.has(ItemNames.brand_lev, world.player)
         elif brand == "cif":
-            return state.has_any_count({ItemNames.brand_cif: 1, ItemNames.brand_prog: 8}, world.player)
+            return state.has(ItemNames.brand_cif, world.player)
         elif brand == "dis":
-            return state.has_any_count({ItemNames.brand_dis: 1, ItemNames.brand_prog: 9}, world.player)
+            return state.has(ItemNames.brand_dis, world.player)
     else:
         return True
 
@@ -126,13 +126,6 @@ def has_shortcut(world: VoidStrangerWorld, state: CollectionState, shortcut: str
             return state.has(ItemNames.shortcut4, world.player)
         elif shortcut == "mon5":
             return state.has(ItemNames.shortcut5, world.player)
-    else:
-        return True
-
-# processes shortcutcheating option
-def check_shortcut_cheating(world: VoidStrangerWorld, state: CollectionState, shortcut: int) -> bool:
-    if world.options.shortcutcheating >= shortcut and not state.has(ItemNames.interface_manip, world.player):
-        return False
     else:
         return True
         
@@ -246,19 +239,19 @@ def set_rules(world: VoidStrangerWorld):
     #shortcutsanity locations
     if world.options.shortcutsanity:
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut1, world.player),
-                 lambda state: can_access_floor_with_locusts(world, state, "B004", 3) and check_shortcut_cheating(world, state, 5))
+                 lambda state: can_access_floor_with_locusts(world, state, "B004", 3))
                  
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut2, world.player),
-                 lambda state: can_access_floor_with_locusts(world, state, "B044", 21) and check_shortcut_cheating(world, state, 4))
+                 lambda state: can_access_floor_with_locusts(world, state, "B044", 21))
         
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut3, world.player),
-                 lambda state: can_access_floor_with_locusts(world, state, "B086", 49) and check_shortcut_cheating(world, state, 3))
+                 lambda state: can_access_floor_with_locusts(world, state, "B086", 49))
 
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut4, world.player),
-                 lambda state: can_access_floor_with_locusts(world, state, "B124", 56) and check_shortcut_cheating(world, state, 2))
+                 lambda state: can_access_floor_with_locusts(world, state, "B124", 56))
     
         add_rule(world.multiworld.get_location(LocationNames.buy_shortcut5, world.player),
-                 lambda state: can_access_floor_with_locusts(world, state, "B196", 77) and check_shortcut_cheating(world, state, 1))
+                 lambda state: can_access_floor_with_locusts(world, state, "B196", 77))
         
     #locust chest locations
     add_rule(world.multiworld.get_location(LocationNames.b032_chest, world.player),

@@ -5,12 +5,13 @@ from Options import Choice, Range, Toggle, PerGameCommonOptions
 class LogicComplexity(Choice):
     """
     Determines the routing complexity required of the player.
+    Not currently implemented
     
     Simple: Smiler Idols and Cheats will not be factored into logic unless absolutely required to reach a location.
         Many (future) settings will be unavailable with Simple Logic.
     
     Full: Any method to reach a location will be in logic.
-        Not currently implemented.
+    
     """
     display_name = "Logic Complexity"
     option_simple = 0
@@ -36,13 +37,6 @@ class Brandsanity(Toggle):
     display_name = "Brandsanity"
     default = 1
 
-class ProgressiveBrands(Toggle):
-    """
-    When enabled, 9 progressive brands are added to the pool instead of specific ones for each domain.
-    Each domain needs an additional brand to enter. No effect when brandsanity is disabled.
-    """
-    display_name = "Progressive Brands"
-
 class Idolsanity(Toggle):
     """
     When enabled, the Lover, Smiler, and Killer Idols are eggs until their respective items are received, and
@@ -56,21 +50,6 @@ class Shortcutsanity(Toggle):
     """
     display_name = "Shortcutsanity"
     default = 1
-
-class ShortcutCheating(Range):
-    """
-    Determines how many of the shortcut hint locations from Mon will require the "Unlock Cheats" item in logic to reach.
-    This starts from the final shortcut, so a value of 2 would make the final 2 shortcut hint locations require cheating.
-    For reference the requirements are as follows: 3, 21, 49, 56, and 77.
-    Only functions with Shortcutsanity enabled.
-    
-    If Locustsanity is off, it is STRONGLY recommended to not set this option to 0.
-    Otherwise, there is a very small chance you may be required by logic to repeat Cif's domain dozens of times to afford the fifth shortcut.
-    """
-    display_name = "Shortcut Cheating"
-    range_start = 0
-    range_end = 5
-    default = 2
 
 class GreedZone(Toggle):
     """
@@ -111,10 +90,8 @@ class VoidStrangerOptions(PerGameCommonOptions):
     logiccomplexity: LogicComplexity
     locustcapacityup: LocustCapacityUp
     brandsanity: Brandsanity
-    progressivebrands: ProgressiveBrands
     idolsanity: Idolsanity
     shortcutsanity: Shortcutsanity
-    shortcutcheating: ShortcutCheating
     greedzone: GreedZone
     greedcoinamount: GreedCoinAmount
     skipcutscenes: SkipCutscenes

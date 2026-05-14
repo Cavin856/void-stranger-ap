@@ -5,16 +5,15 @@ from BaseClasses import Region, Item, MultiWorld, CollectionState, ItemClassific
 from Options import OptionError
 from worlds.AutoWorld import WebWorld, World, LogicMixin
 
-from .Constants.ItemNames import greed_coin
 from .Items import VoidStrangerItem, burden_item_data_table, misc_item_data_table, brand_item_data_table, \
-    statue_item_data_table, shortcut_item_data_table, locust_item_table, item_data_table, item_table, \
-    prog_brand_item_data_table
+    statue_item_data_table, shortcut_item_data_table, item_data_table, item_table
 from .Locations import VoidStrangerLocation, burden_location_data_table, misc_location_data_table,\
     mural_location_data_table, statue_location_data_table, shortcut_location_data_table, chest_location_data_table, \
     location_table, greed_chest_location_data_table
 from .Options import VoidStrangerOptions
 from .Constants import ItemNames, LocationNames
 from .LocationGroups import vs_location_groups
+from .ItemGroups import vs_item_groups
 
 class VoidStrangerWebWorld(WebWorld):
     theme = "stone"
@@ -30,6 +29,7 @@ class VoidStrangerWorld(World):
     location_name_to_id = location_table
     item_name_to_id = item_table
     location_name_groups = vs_location_groups
+    item_name_groups = vs_item_groups
 
     #Instance Data
     goal_logic_mapping: Dict[str, List[List[str]]]
@@ -189,7 +189,7 @@ class VoidStrangerWorld(World):
                             white_void = True #dummy variable until white void dungeon is added
                             i = 55
                         else:
-                            queue.append((self.vs_brane_order[floor_index_fixed + i], max(floor_index_changeable, i)))
+                            queue.append((self.vs_brane_order[floor_index_fixed + i], max(min(floor_index_changeable, max_locust_score), i)))
                         i -= 1
             
             if floor["Stairs"] != False:
@@ -270,13 +270,9 @@ class VoidStrangerWorld(World):
             
         if self.options.brandsanity:
             location_count+= 9
-
-            if self.options.progressivebrands:
-                item_pool += [self.create_item(ItemNames.brand_prog) for _ in range(9)]
-            else:
-                item_pool += [self.create_item(name)
-                              for name in brand_item_data_table.keys()
-                              if name not in self.options.start_inventory]
+            item_pool += [self.create_item(name)
+                          for name in brand_item_data_table.keys()
+                          if name not in self.options.start_inventory]
         if self.options.idolsanity:
             location_count+= 3
             item_pool += [self.create_item(name)
@@ -356,10 +352,8 @@ class VoidStrangerWorld(World):
             "locustcapacityup": self.options.locustcapacityup.value,
             #"locustcapacityamount": self.locust_up_amount,
             "startingmaxlocust": self.starting_max_locust,
-            "progressivebrands": self.options.progressivebrands.value,
             "idolsanity": self.options.idolsanity.value,
             "shortcutsanity": self.options.shortcutsanity.value,
-            "shortcutcheating": self.options.shortcutcheating.value,
             "greedzone": self.options.greedzone.value,
             "greedcoinamount": self.options.greedcoinamount.value,
             "skipcutscenes": self.options.skipcutscenes.value,
