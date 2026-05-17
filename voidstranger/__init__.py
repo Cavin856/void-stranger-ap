@@ -1,6 +1,6 @@
 import importlib, math
 from typing import Dict, List
-from collections import defaultdict
+from collections import defaultdict, deque
 from BaseClasses import Region, Item, MultiWorld, CollectionState, ItemClassification
 from Options import OptionError
 from worlds.AutoWorld import WebWorld, World, LogicMixin
@@ -11,7 +11,7 @@ from .Locations import VoidStrangerLocation, burden_location_data_table, misc_lo
     mural_location_data_table, statue_location_data_table, shortcut_location_data_table, chest_location_data_table, \
     location_table, greed_chest_location_data_table
 from .Options import VoidStrangerOptions
-from .Constants import ItemNames
+from .Constants import ItemNames, LocationNames
 from .LocationGroups import vs_location_groups
 from .ItemGroups import vs_item_groups
 
@@ -116,47 +116,38 @@ class VoidStrangerWorld(World):
             self.vs_brane_list.update(Floors.vanilla_floors.VanillaDungeonEntrances)
         
         
-        # Add required access rule tags to each active floor
-        # Compile floor lists for each statue type
+        # add required access rule tags to each active floor
+        # compile floor lists for each statue type
         for brane in self.vs_brane_list:
             for statue_type in self.vs_brane_list[brane]["Statues"]:
                 self.vs_statue_floors[statue_type].append(brane)
             
         
-        # parse stair connections with "next"
-        # TODO check for Skipped Tag here
+        # connect stairs in brane order
         for brane in self.vs_brane_order:
-            if self.vs_brane_list[brane]["Stairs"] != False:
-                if self.vs_brane_list[brane]["Stairs"][0] == "next":
-                    if self.vs_brane_order.index(brane) == 255:
-                        if False:   # if white void dungeon is enabled
-                            self.vs_brane_list[brane]["Dungeon"] = ("white_void", self.vs_brane_list[brane]["Stairs"][1])
-                        self.vs_brane_list[brane]["Stairs"] = False
-                    else:
-                        self.vs_brane_list[brane]["Stairs"] = (self.vs_brane_order[self.vs_brane_order.index(brane) + 1], self.vs_brane_list[brane]["Stairs"][1]) # messy line to replace a tuple
+            floor = self.vs_brane_list[brane]
+            if floor["Stairs"] != False:
+                if floor["Stairs"][0] == "next":
+                    brane_index = self.vs_brane_order.index(brane)
+                    i = 1
+                    while True:
+                        if brane_index + i > 255:
+                            if False:   # if white void dungeon is enabled
+                                floor["Dungeon"] = ("white_void", floor["Stairs"][1])
+                            floor["Stairs"] = False
+                            break
+                        next_floor = self.vs_brane_order[brane_index + i]
+                        if self.vs_brane_list[next_floor]["Skipped"] == True:
+                            i += 1
+                            continue
+                        else:
+                            floor["Stairs"] = (next_floor, floor["Stairs"][1]) # update stair connection by replacing the tuple
+                            break
         super().__init__(multiworld, player)
     
     
     
-    # primary function for checking floor accessibility
-    # checks if the target floor has already been visited with a better locust score, and if not, whether the required items for the connection have been collected
-    # connection tuple format: (destination, [[option A item_tuples],[option B item_tuples]], running_locust_score)
-    def check_floor_connection(self, state, connection_tuple, current_brane, brane_index) -> tuple[bool, str, int|str]:
-        from .Rules import check_item_tuples
-        if state.vs_brane_accessibility[self.player][connection_tuple[0]]["Accessible"] == True and state.vs_brane_accessibility[self.player][connection_tuple[0]]["Locust_Score"] >= connection_tuple[2]:
-            return False, current_brane, brane_index
-        if check_item_tuples(self, state, connection_tuple[1]):
-            if connection_tuple[0] in self.vs_brane_order:
-                brane_index = self.vs_brane_order.index(connection_tuple[0])
-            else:
-                brane_index = "???"
-            return True, connection_tuple[0], brane_index
-        else:
-            return False, current_brane, brane_index
-    
-    
     # main pathfinding function
-    # iterates through every possible connection between floors to determine accessibility with the current set of collected items
     def calculate_accessibility(self, state) -> None:
         from .Rules import has_item_by_type, check_item_tuples
         state.vs_stale_pathfinding[self.player] = False
@@ -164,16 +155,14 @@ class VoidStrangerWorld(World):
         for brane in self.vs_brane_list:
             state.vs_brane_accessibility[self.player].update({brane: {"Accessible": False, "Locust_Score": -1}})
         
-        max_locust_score = max(99, (state.prog_items[self.player][ItemNames.locust_capacity_up] * self.locust_up_size) + self.starting_max_locust)
+        max_locust_score = min(99, (state.prog_items[self.player][ItemNames.locust_capacity_up] * self.locust_up_size) + self.starting_max_locust)
+        #print(max_locust_score)
+        #max_locust_score = 30
         
         # main pathfinding loop
-        queue = [("B001", 0)]
+        queue = deque([("B001", 0)])
         while queue:
-            current_brane, locust_score = queue.pop(0)
-            #for node in queue:
-            #    if current_brane == node[0]:
-            #        locust_score = max(locust_score, node[1])
-            #        queue.remove(node)
+            current_brane, locust_score = queue.pop()
                     
             brane_access = state.vs_brane_accessibility[self.player][current_brane]
             if brane_access["Accessible"] and brane_access["Locust_Score"] >= locust_score:
@@ -182,10 +171,31 @@ class VoidStrangerWorld(World):
             brane_access["Accessible"] = True
             brane_access["Locust_Score"] = locust_score
             floor = self.vs_brane_list[current_brane]
+            if current_brane in self.vs_brane_order:
+                floor_index = self.vs_brane_order.index(current_brane)
+            else:
+                floor_index = -1
             
             locust_score += floor["Chest_Score"]
             if locust_score > max_locust_score:
                 locust_score = max_locust_score
+                
+            if floor_index != -1 and floor["Interface"] != False:
+                if check_item_tuples(self, state, floor["Interface"]):
+                    floor_index_fixed = (floor_index // 100) * 100 #round down to hundreds
+                    floor_index_changeable = floor_index % 100
+                    locust_score = min(max(floor_index_changeable, locust_score), max_locust_score) #update locust score for other paths
+                    i = locust_score
+                    while i >= 0:
+                        if floor_index_fixed + i > 255:
+                            white_void = True #dummy variable until white void dungeon is added
+                            i = 55
+                        else:
+                            new_score = max(min(floor_index_changeable, max_locust_score), i)
+                            new_floor = floor_index_fixed + i
+                            queue.append((self.vs_brane_order[new_floor], new_score))
+                            #print(str(floor_index) + " " + str(floor_index_fixed) + " " + str(floor_index_changeable) + " " + str(max_locust_score) + " " + str(new_floor) + " " + str(new_score))
+                        i -= 1
             
             if floor["Stairs"] != False:
                 if check_item_tuples(self, state, floor["Stairs"][1]):
@@ -200,7 +210,17 @@ class VoidStrangerWorld(World):
                 for brand_carve in Floors.vanilla_floors.VanillaBrandCarving[current_brane]:
                     if check_item_tuples(self, state, brand_carve[1]):
                         queue.append((brand_carve[0], locust_score))
-                        
+            
+            if floor_index != -1 and floor["Smiler"] != False:
+                if check_item_tuples(self, state, floor["Smiler"]):
+                    i = locust_score
+                    while i > 0:
+                        if floor_index + i > 255:
+                            white_void = True #dummy variable until white void dungeon is added
+                        else:
+                            queue.append((self.vs_brane_order[floor_index + i], 0))
+                        i -= 1
+                                                    
         #print(state.vs_brane_accessibility[self.player])
         
     
@@ -247,23 +267,18 @@ class VoidStrangerWorld(World):
             unfilled_locations = unfilled_locations + 15 - self.greed_coin_count
             item_pool += [self.create_item(ItemNames.greed_coin) for _ in range(self.greed_coin_count)]
         
-        self.locust_up_size: int = int(self.options.locustcapacityup.value)
+        #self.locust_up_size: int = int(self.options.locustcapacityup.value)
+        self.locust_up_size: int = 3
         self.locust_up_amount: int = min(unfilled_locations, math.ceil(99 / self.locust_up_size))
-        self.starting_max_locust: int = math.ceil(99 / self.locust_up_size) - self.locust_up_amount
+        self.starting_max_locust: int = (math.ceil(99 / self.locust_up_size) - self.locust_up_amount) * self.locust_up_size
         unfilled_locations -= self.locust_up_amount
         item_pool += [self.create_item(ItemNames.locust_capacity_up) for _ in range(self.locust_up_amount)]
-        print("LocUP " + str(self.locust_up_amount))
-        #input()
             
         if self.options.brandsanity:
             location_count+= 9
-
-            if self.options.progressivebrands:
-                item_pool += [self.create_item(ItemNames.brand_prog) for _ in range(9)]
-            else:
-                item_pool += [self.create_item(name)
-                              for name in brand_item_data_table.keys()
-                              if name not in self.options.start_inventory]
+            item_pool += [self.create_item(name)
+                          for name in brand_item_data_table.keys()
+                          if name not in self.options.start_inventory]
         if self.options.idolsanity:
             location_count+= 3
             item_pool += [self.create_item(name)
@@ -343,10 +358,8 @@ class VoidStrangerWorld(World):
             "locustcapacityup": self.options.locustcapacityup.value,
             #"locustcapacityamount": self.locust_up_amount,
             "startingmaxlocust": self.starting_max_locust,
-            "progressivebrands": self.options.progressivebrands.value,
             "idolsanity": self.options.idolsanity.value,
             "shortcutsanity": self.options.shortcutsanity.value,
-            "shortcutcheating": self.options.shortcutcheating.value,
             "greedzone": self.options.greedzone.value,
             "greedcoinamount": self.options.greedcoinamount.value,
             "skipcutscenes": self.options.skipcutscenes.value,

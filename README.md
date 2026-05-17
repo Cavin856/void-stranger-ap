@@ -51,7 +51,7 @@ Finally, be sure to add gm-apclientpp.dll and ap_room_names.csv to the Void Stra
 ## AP Menu
 
 If the game was patched successfully, you can open the AP menu by pushing F10 or binding a controller button to it.
-The AP menu has three pages, which can be navigated with left and right.
+The AP menu has multiple pages, which can be navigated with left and right.
 
 - Connection page
 
@@ -80,11 +80,30 @@ The AP menu has three pages, which can be navigated with left and right.
   Waypoints restore your locust count to what it was when the waypoint was made.
   Waypoints can only be set on numbered branes.
 
+- Extra page
+
+  This page was added as a result of having too many pages.
+  The Connection, Debug, and Palette pages can be loaded from here, as these pages are not frequently required.
+
 - Debug page
 
-  Shows several interal variables used for debugging.
+  Shows several internal variables used for debugging.
   If something clearly wrong occurs with your AP connection, or some items seem to vanish from your inventory,
   please ping @Cavin856 with a screenshot of the debug page in the Void Stranger channel in the AP discord.
+
+  Palette page
+
+  Allows previewing and selecting a custom palette from the palettes.txt file.
+  Place the palettes.txt file (a sample file is included) in the save directory, which is NOT the same as the game directory.
+  Typically found in appdata/local/void_stranger
+  Custom palettes much follow the following format, where each color is a valid hex color preceeded by 0x (this means no #'s)
+  Name1
+  0xColor1
+  0xColor2
+  0xColor3
+  0xColor4
+  Name2
+  etc
 
 ## Known bugs
 
@@ -139,12 +158,10 @@ There are options for the following:
 - Adding the ability to use brands to the item pool, with the murals having locations. Without a Void Lord's Brand,
   you cannot progress beyond their domain. No shortcuts of any kind are considered
   in the logic with this enabled at the moment
-- Making the Brand items progressive. Each one you have will grant the next brand in order.
 - Disabling Smilers, Lovers and Killers until finding their respective items. Adds locations for talking to them with 
 the void memory. Note that getting all of these items is required for go mode, and you may get stuck without them
 in the final area
 - Adding ability to use shortcuts to the item pool, talking to Mon in each location gives checks
-- Adding interface manipulation as a requirement for as many of the shortcuts as you want
 - Adding the 15 chests (including the 3 before the final room) at the end Mon's Lair as locations. The item pool will 
 have 15 "Greed Coins" added which lock the entrance until they are all collected. You can also add more Greed Coins to 
 the pool, removing locusts from the pool to make room. This option only works with normal chests being randomized 
@@ -157,32 +174,15 @@ sequence.
 
 ## Future Plans
 
-1. Support for characters other than Gray, more on that in #2
+This is not an exhaustive list of all future planned updates.
+Many more features are planned, but not currently in development.
 
-2. More Goals, I'm thinking the normal ending for all three characters. Perhaps Bee's Stinky Hole would be a good short 
-goal. Additionally, a MacGuffin oriented goal seems fitting. Carcass ending seems like a pretty bad goal in my opinion, 
-requires exactly one item and its annoying to reach unless you play as Cif. We could also have a goal to beat all
- bosses.
+0.10.0      Logic Part 2, Custom Palette support
+0.10.1      Many bug fixes
+0.11.0      "Dungeons" / new vanilla checks, Traps
+0.12.0      Revamped Item Tracker, New Location Tracker
 
-3. Getting multiple endings to goal, something like "reach three endings" and then the player can choose which ones to 
-reach.
-
-4. Add an option for all kinds of shortcuts being accounted for in logic with brandsanity
-
-5. MAYBE more locations, but many ideas I've seen (memento crystals mainly) have one big issue: there aren't any more 
-items left to place in those locations. Perhaps I could let the player choose locust chests or memento crystals as 
-locations, but not both. There are already way too many locust items in the pool as it is.
-
-Notable ideas include:
-- The 9 reachable chests in the Voided sequence
-- Bottom of the white void
-
-6. Gor cube as an alternate location instead of the normal kill
-
-7. Possibly shuffling in new player dungeons and floors to remix things up?
-
-
-## Special Thanks
+## Contributors
 
 ThatOneGuy - For making the Manual Void Stranger AP Implementation
 
@@ -192,8 +192,12 @@ brainstorming ideas.
 [@LeonarthCG](https://github.com/LeonarthCG) - For helping a massive amount with the gamemaker net code side of things 
 (and of course working on that library in the first place!).
 
-[@Cavin856](https://github.com/Cavin856) -  Feature implementations & bug fixes.
+[@CriminalPancake](https://github.com/CriminalPancake) -  For making the initial AP development and paving the way to make future developments possible.
 
-[@Eijebong](https://github.com/Eijebong) - Rewrote and helped considerably with the pathfinding algorithm and debugging/fuzzing
+[@Cavin856](https://github.com/Cavin856) -  For handling the current AP development
 
-[@Mysteryem](https://github.com/Mysteryem) - Further help with bugfixes in the python code
+[@Eijebong](https://github.com/Eijebong) - For rewriting and helping considerably with the pathfinding algorithm and debugging/fuzzing
+
+[@Mysteryem](https://github.com/Mysteryem) - For further help with bugfixes in the python code
+
+Anonymous - For arranging the default custom palettes
