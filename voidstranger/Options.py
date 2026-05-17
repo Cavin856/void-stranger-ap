@@ -21,13 +21,13 @@ class LogicComplexity(Choice):
 class LocustCapacityUp(Range):
     """
     How much each Max Locust Up will increase you locust carrying capacity.
-    No effect without Locustsanity. Valid range is 1-5.
-    It is not reccommended to set this to 1, as there are not enough locations
+    This option has been disabled and is likely to be removed in the near future.
+    Currently locked at 3, regardless of value chosen here.
     """
     display_name = "Max Locust Up Size"
     range_start = 1
     range_end = 5
-    default = 2
+    default = 3
 
 class Brandsanity(Toggle):
     """

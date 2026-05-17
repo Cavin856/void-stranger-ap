@@ -156,6 +156,8 @@ class VoidStrangerWorld(World):
             state.vs_brane_accessibility[self.player].update({brane: {"Accessible": False, "Locust_Score": -1}})
         
         max_locust_score = min(99, (state.prog_items[self.player][ItemNames.locust_capacity_up] * self.locust_up_size) + self.starting_max_locust)
+        #print(max_locust_score)
+        #max_locust_score = 30
         
         # main pathfinding loop
         queue = deque([("B001", 0)])
@@ -189,7 +191,10 @@ class VoidStrangerWorld(World):
                             white_void = True #dummy variable until white void dungeon is added
                             i = 55
                         else:
-                            queue.append((self.vs_brane_order[floor_index_fixed + i], max(min(floor_index_changeable, max_locust_score), i)))
+                            new_score = max(min(floor_index_changeable, max_locust_score), i)
+                            new_floor = floor_index_fixed + i
+                            queue.append((self.vs_brane_order[new_floor], new_score))
+                            #print(str(floor_index) + " " + str(floor_index_fixed) + " " + str(floor_index_changeable) + " " + str(max_locust_score) + " " + str(new_floor) + " " + str(new_score))
                         i -= 1
             
             if floor["Stairs"] != False:
@@ -262,7 +267,8 @@ class VoidStrangerWorld(World):
             unfilled_locations = unfilled_locations + 15 - self.greed_coin_count
             item_pool += [self.create_item(ItemNames.greed_coin) for _ in range(self.greed_coin_count)]
         
-        self.locust_up_size: int = int(self.options.locustcapacityup.value)
+        #self.locust_up_size: int = int(self.options.locustcapacityup.value)
+        self.locust_up_size: int = 3
         self.locust_up_amount: int = min(unfilled_locations, math.ceil(99 / self.locust_up_size))
         self.starting_max_locust: int = (math.ceil(99 / self.locust_up_size) - self.locust_up_amount) * self.locust_up_size
         unfilled_locations -= self.locust_up_amount

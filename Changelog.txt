@@ -19,6 +19,9 @@ v0.10.0
 			As a result of this, B077's Chest Score is now 3 instead of 2
 		Remove ProgressiveBrands and ShortcutCheating options
 			Logic rewrites, waypoints, and free deaths render these options obsolete
+		LocustCapacityUp has been disabled and forced to 3
+			There were generation issues with lower values
+			This setting is likely to be removed in the future
 
 	Fix:
 		Max locust score is now calculated correctly
