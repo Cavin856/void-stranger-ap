@@ -1,10 +1,27 @@
 Known Issues:
 	Collecting a locust chest containing a Max Locust Up gives you the locusts first and then upgrades your capacity, wasting locusts if you're at max capacity.
 	It is theoretically possible that logic will require you to loop Cif's Domain (or some other subset of floors) more times than reasonable in order to grind up locusts.
-	Sending checks while not connected can cause issues.
-	There may be issues End_Run not properly resetting values between multiworlds. If so, close and re-open the game, and report the issue in the discord.
+
+
+
+v0.10.1
+	Change:
+		Reworked Connection Menu navigation & other misc changes
+			Now pressing "Enter" is required to type in a field
+			To connect press "Enter" on the submit button
+			"Tab" still navigates between fields
+	Fix:
+		Checked locations are now queued
+			Aka it's now safe to check locations while not connected to AP
+			The game will track what needs to be sent and will send them out when you reconnect to AP
+		End Run now disconnects you from AP
+		Receiving a shortcut from AP in the room with that shortcut no longer requires reloading to room to use it
+		Fixed status line on Connection Menu not showing the proper connection status
+
+
 
 v0.10.0
+
 	New:
 		Smiler and Interface pathfinding logic is now functional
 		Added Palette Menu and custom Palette Functionality
