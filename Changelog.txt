@@ -4,6 +4,12 @@ Known Issues:
 
 
 
+v0.10.2
+	Fix:
+		Fixed Mon Bank shutting down if you are connected to AP instead of if you are not.
+
+
+
 v0.10.1
 	Change:
 		Reworked Connection Menu navigation & other misc changes
