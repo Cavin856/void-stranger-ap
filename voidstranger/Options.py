@@ -4,9 +4,6 @@ from Options import Choice, Range, Toggle, OptionSet, PerGameCommonOptions
 
 class LogicComplexity(Choice):
     """
-    Determines the routing complexity required of the player.
-    Not currently implemented
-    
     Simple: Smiler warps (Bee statues) will not be factored into logical progression.
             Interface manipulation will also not be factored into logic with the following exceptions:
                 Traversing DIS
