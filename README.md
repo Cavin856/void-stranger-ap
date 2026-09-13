@@ -1,4 +1,4 @@
-# void-stranger-ap v0.11.0
+# void-stranger-ap v0.11.1
 Archipelago integration for Void Stranger.  
 This document and repository contains major spoilers for the game.
 Thus, it is not recommended to read this until you have absolutely cleared the game for sure.
@@ -161,7 +161,7 @@ The AP menu consists of multiple sub-menus, which can be navigated with left and
 
 ### Known major issues
 
-1. Opening a chest containing a locust capacity up will not grant additional locusts. This will be fixed in v0.11.1
+1. Opening a chest containing a locust capacity up will not grant additional locusts.
 2. It is theoretically possible that logic will require you to loop Cif's Domain (or some other subset of floors)
     more times than reasonable in order to grind up locusts. No solution has been found yet.
 

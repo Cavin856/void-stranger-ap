@@ -91,8 +91,8 @@ class Disdungeon(Choice):
     Full is the normal vanilla length.
     """
     display_name = "DIS Length"
-    option_short = 0
-    option_full = 1
+    option_full = 0
+    option_short = 1
     default = 0
 
 class GreedCoinAmount(Range):

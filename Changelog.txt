@@ -2,6 +2,12 @@ Known Issues:
 	- Collecting a locust chest containing a Max Locust Up gives you the locusts first and then upgrades your capacity, wasting locusts if you're at max capacity.
 	- It is theoretically possible that logic will require you to loop Cif's Domain (or some other subset of floors) more times than reasonable in order to grind up locusts.
 
+
+v0.11.1
+	Fix:
+		Fixed Short Dis options being labeled backwards
+		Fixed Short Dis Progress resetting if you closed the game inside DIS
+
 v0.11.0
 	New:
 		Short Dis is now an option
