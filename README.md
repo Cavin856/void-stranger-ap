@@ -1,4 +1,4 @@
-# void-stranger-ap v0.11.1
+# void-stranger-ap v0.11.X
 Archipelago integration for Void Stranger.  
 This document and repository contains major spoilers for the game.
 Thus, it is not recommended to read this until you have absolutely cleared the game for sure.

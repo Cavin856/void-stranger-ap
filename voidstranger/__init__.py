@@ -260,7 +260,7 @@ class VoidStrangerWorld(World):
         item_pool += [self.create_item(ItemNames.locust_capacity_up) for _ in range(33)]
             
         if self.options.idolsanity:
-            location_count+= 3
+            unfilled_locations-= 3
             item_pool += [self.create_item(name)
                           for name in statue_item_data_table.keys()
                           if name not in self.options.start_inventory]
