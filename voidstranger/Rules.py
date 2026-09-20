@@ -433,7 +433,7 @@ def set_rules(world: VoidStrangerWorld):
              lambda state: can_access_floor(world, state, "beehole_entrance") and state.has(ItemNames.void_sword, world.player))
         add_rule(world.multiworld.get_location(LocationNames.bee1_chest2, world.player),
              lambda state: can_access_floor(world, state, "beehole_entrance") and state.has(ItemNames.void_sword, world.player))
-        add_rule(world.multiworld.get_location(LocationNames.bee15_chest2, world.player),
+        add_rule(world.multiworld.get_location(LocationNames.bee15_chest1, world.player),
              lambda state: can_access_floor(world, state, "beehole") and state.has(ItemNames.void_sword, world.player) and has_idol(world, state, "watcher"))
         add_rule(world.multiworld.get_location(LocationNames.bee15_chest2, world.player),
              lambda state: can_access_floor(world, state, "beehole") and state.has(ItemNames.void_sword, world.player) and has_idol(world, state, "watcher"))
